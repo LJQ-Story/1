@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>致最可爱的你</title>
+    <style>
+        body {
+            margin: 0;
+            background: #fff0f3; /* 浪漫浅粉色 */
+            font-family: 'Microsoft YaHei', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            color: #d63384;
+        }
+        .container {
+            width: 85%;
+            max-width: 400px;
+            background: white;
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        .heart {
+            font-size: 60px;
+            animation: beat 0.8s infinite alternate;
+            margin-bottom: 10px;
+        }
+        @keyframes beat { to { transform: scale(1.1); } }
+        h1 { font-size: 24px; margin: 10px 0; }
+        p { line-height: 1.6; font-size: 16px; color: #666; }
+        .photo {
+            width: 100%;
+            border-radius: 15px;
+            margin: 15px 0;
+        }
+        .footer { font-size: 14px; color: #ff85a1; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="heart">❤️</div>
+        <h1>致：我的女朋友</h1>
+        <p>这是我为你亲手搭建的第一个网站。</p>
+
+        <!-- 如果你有照片，把照片重命名为 us.jpg 放在同一文件夹 -->
+        <img src="us.jpg" alt="我们的照片" class="photo" onerror="this.style.display='none'">
+
+        <p>在这个属于我们的角落，<br>想告诉你：遇见你真好。</p>
+        <div class="footer">LJQ专属</div>
+    </div>
+</body>
+</html>
