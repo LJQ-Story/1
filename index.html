@@ -185,7 +185,7 @@
         }
 
         // 3. 倒计时 (在这里修改日期：年, 月-1, 日)
-        const startDate = new Date(2023, 4, 20);
+        const startDate = new Date(2026, 4, 20);
         function updateTimer() {
             const now = new Date();
             const diff = now - startDate;
@@ -194,7 +194,7 @@
             document.getElementById('mins').innerText = Math.floor((diff / 1000 / 60) % 60).toString().padStart(2, '0');
             document.getElementById('secs').innerText = Math.floor((diff / 1000) % 60).toString().padStart(2, '0');
         }
-        setInterval(updateTimer, 1000);
+        setInterval(updateTimer, 100);
 
         // 4. 滚动显现逻辑
         const observer = new IntersectionObserver((entries) => {
