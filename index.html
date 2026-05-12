@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>致我最亲爱的你 - 星河漫步</title>
+    <style>
+        /* 全局变量：高级蓝紫赛博色调 */
+        :root {
+            --primary: #a855f7;
+            --accent: #ec4899;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #020205; color: white; font-family: 'PingFang SC', sans-serif; overflow-x: hidden; }
+
+        /* 入场开启遮罩 - 解决自动播放的核心 */
+        #gate {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #050510; z-index: 10000;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            transition: all 1.2s cubic-bezier(0.7, 0, 0.3, 1);
+        }
+        .envelope {
+            font-size: 80px; margin-bottom: 20px; animation: float 2s infinite ease-in-out;
+        }
+        #open-btn {
+            padding: 15px 40px; background: linear-gradient(45deg, var(--primary), var(--accent));
+            border: none; color: white; border-radius: 50px; font-size: 1.2rem;
+            cursor: pointer; box-shadow: 0 0 30px rgba(168, 85, 247, 0.6);
+            transition: 0.3s;
+        }
+        #open-btn:hover { transform: scale(1.1); box-shadow: 0 0 50px rgba(168, 85, 247, 0.8); }
+
+        /* 背景 Canvas */
+        #bg-canvas { position: fixed; top: 0; left: 0; z-index: -1; }
+
+        /* 磨砂玻璃卡片通用样式 */
+        .glass-card {
+            background: var(--glass); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--border); border-radius: 20px;
+        }
+
+        /* 1. 首屏 */
+        .hero { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        .hero-title { font-size: 3.5rem; background: linear-gradient(to right, #a855f7, #ec4899); -webkit-background-clip: text; color: transparent; margin-bottom: 20px; letter-spacing: 5px; }
+        #typewriter { font-size: 1.4rem; color: rgba(255,255,255,0.8); min-height: 1.6em; }
+
+        /* 2. 3D 相册 - 修复了停转Bug */
+        .gallery-section { padding: 100px 0; perspective: 1500px; }
+        .gallery-title { text-align: center; margin-bottom: 60px; color: var(--primary); font-size: 2rem; letter-spacing: 3px; }
+        .carousel {
+            width: 280px; height: 380px; margin: 50px auto; position: relative; transform-style: preserve-3d;
+            animation: rotateGallery 25s infinite linear; /* 永久旋转 */
+        }
+        .carousel-item {
+            position: absolute; width: 100%; height: 100%; border-radius: 15px; overflow: hidden;
+            border: 2px solid var(--border); box-shadow: 0 0 25px rgba(168, 85, 247, 0.3);
+            background: #111;
+        }
+        .carousel-item img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+
+        @keyframes rotateGallery {
+            from { transform: rotateY(0deg); }
+            to { transform: rotateY(360deg); }
+        }
+
+        /* 3D 布局：6张图分布 */
+        .carousel-item:nth-child(1) { transform: rotateY(0deg) translateZ(350px); }
+        .carousel-item:nth-child(2) { transform: rotateY(60deg) translateZ(350px); }
+        .carousel-item:nth-child(3) { transform: rotateY(120deg) translateZ(350px); }
+        .carousel-item:nth-child(4) { transform: rotateY(180deg) translateZ(350px); }
+        .carousel-item:nth-child(5) { transform: rotateY(240deg) translateZ(350px); }
+        .carousel-item:nth-child(6) { transform: rotateY(300deg) translateZ(350px); }
+
+        /* 3. 倒计时 */
+        .timer-section { padding: 100px 20px; text-align: center; }
+        .timer-grid { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-top: 40px; }
+        .time-box { padding: 25px; min-width: 120px; }
+        .time-num { font-size: 2.8rem; font-weight: bold; color: var(--accent); text-shadow: 0 0 15px rgba(236, 72, 153, 0.5); }
+        .time-unit { font-size: 0.8rem; margin-top: 10px; color: rgba(255,255,255,0.6); }
+
+        /* 4. 时光轴 */
+        .timeline { max-width: 800px; margin: 0 auto; padding: 100px 20px; }
+        .t-item { display: flex; margin-bottom: 50px; opacity: 0; transform: translateX(-30px); transition: 1s; }
+        .t-item.reveal { opacity: 1; transform: translateX(0); }
+        .t-dot { width: 16px; height: 16px; background: var(--primary); border-radius: 50%; margin-right: 25px; margin-top: 10px; box-shadow: 0 0 15px var(--primary); flex-shrink: 0; }
+        .t-content { padding: 25px; width: 100%; }
+
+        /* 手机端适配 */
+        @media (max-width: 768px) {
+            .carousel { width: 180px; height: 260px; }
+            .carousel-item:nth-child(n) { transform: rotateY(calc((n - 1) * 60deg)) translateZ(220px); }
+            .hero-title { font-size: 2.2rem; }
+            .time-box { min-width: 80px; padding: 15px; }
+            .time-num { font-size: 1.8rem; }
+        }
+
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+    </style>
+</head>
+<body>
+
+    <audio id="bgMusic" loop>
+        <source src="bnsdmm.flac" type="audio/mpeg">
+    </audio>
+
+    <div id="gate">
+        <div class="envelope">✉️</div>
+        <button id="open-btn">点击开启 LJQ 的专属浪漫</button>
+    </div>
+
+    <canvas id="bg-canvas"></canvas>
+
+    <section class="hero">
+        <h1 class="hero-title">星光不及你眉眼</h1>
+        <div id="typewriter"></div>
+    </section>
+
+    <section class="gallery-section">
+        <h2 class="gallery-title">✨ 记忆回廊 ✨</h2>
+        <div class="carousel">
+            <div class="carousel-item"><img src="6.jpg" alt="1"></div>
+            <div class="carousel-item"><img src="5.jpg" alt="2"></div>
+            <div class="carousel-item"><img src="4.jpg" alt="3"></div>
+            <div class="carousel-item"><img src="2.jpg" alt="4"></div>
+            <div class="carousel-item"><img src="3.jpg" alt="5"></div>
+            <div class="carousel-item"><img src="1.jpg" alt="6"></div>
+        </div>
+    </section>
+
+    <section class="timer-section">
+        <h2 class="gallery-title">⏳ 宇宙见证的时间 ⏳</h2>
+        <div class="timer-grid">
+            <div class="time-box glass-card"><div class="time-num" id="days">0</div><div class="time-unit">DAYS</div></div>
+            <div class="time-box glass-card"><div class="time-num" id="hours">00</div><div class="time-unit">HOURS</div></div>
+            <div class="time-box glass-card"><div class="time-num" id="mins">00</div><div class="time-unit">MINS</div></div>
+            <div class="time-box glass-card"><div class="time-num" id="secs">00</div><div class="time-unit">SECS</div></div>
+        </div>
+    </section>
+
+    <section class="timeline">
+        <h2 class="gallery-title">📜 我们的故事 📜</h2>
+        <div class="t-item glass-card">
+            <div class="t-dot"></div>
+            <div class="t-content">
+                <h3 style="color:var(--primary); margin-bottom:10px;">2026.04.20</h3>
+                <p>我们在茫茫人海中相遇，那一刻星光闪烁，故事开始了。</p>
+            </div>
+        </div>
+        <div class="t-item glass-card">
+            <div class="t-dot"></div>
+            <div class="t-content">
+                <h3 style="color:var(--primary); margin-bottom:10px;">我们的日常</h3>
+                <p>一起走过的街道，吃过的饭，都成了我最珍藏的回忆。</p>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // 1. 开启逻辑：触发音乐 + 隐藏遮罩 + 启动动画
+        const audio = document.getElementById('bgMusic');
+        const openBtn = document.getElementById('open-btn');
+        const gate = document.getElementById('gate');
+
+        openBtn.onclick = () => {
+            gate.style.opacity = '0';
+            gate.style.transform = 'translateY(-100%)';
+            audio.play(); // 用户点击后，浏览器允许播放音乐
+            setTimeout(startTypewriter, 1000);
+            setTimeout(() => gate.remove(), 1200);
+        };
+
+        // 2. 打字机
+        const text = "在这浩瀚宇宙中 我只想牵着你的手";
+        let i = 0;
+        function startTypewriter() {
+            if (i < text.length) {
+                document.getElementById("typewriter").innerHTML += text.charAt(i);
+                i++;
+                setTimeout(startTypewriter, 120);
+            }
+        }
+
+        // 3. 倒计时 (在这里修改日期：年, 月-1, 日)
+        const startDate = new Date(2023, 4, 20);
+        function updateTimer() {
+            const now = new Date();
+            const diff = now - startDate;
+            document.getElementById('days').innerText = Math.floor(diff / (1000 * 60 * 60 * 24));
+            document.getElementById('hours').innerText = Math.floor((diff / (1000 * 60 * 60)) % 24).toString().padStart(2, '0');
+            document.getElementById('mins').innerText = Math.floor((diff / 1000 / 60) % 60).toString().padStart(2, '0');
+            document.getElementById('secs').innerText = Math.floor((diff / 1000) % 60).toString().padStart(2, '0');
+        }
+        setInterval(updateTimer, 1000);
+
+        // 4. 滚动显现逻辑
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('reveal'); });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.t-item').forEach(item => observer.observe(item));
+
+        // 5. 星空背景 Canvas
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let stars = [];
+        function initCanvas() {
+            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+            stars = [];
+            for(let i=0; i<200; i++) stars.push({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, size: Math.random()*1.5, speed: Math.random()*0.5 });
+        }
+        function drawStars() {
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            ctx.fillStyle = "white";
+            stars.forEach(s => {
+                ctx.globalAlpha = Math.random();
+                ctx.beginPath(); ctx.arc(s.x, s.y, s.size, 0, Math.PI*2); ctx.fill();
+                s.y += s.speed; if(s.y > canvas.height) s.y = 0;
+            });
+            requestAnimationFrame(drawStars);
+        }
+        window.onresize = initCanvas;
+        initCanvas(); drawStars();
+    </script>
+</body>
+</html>
